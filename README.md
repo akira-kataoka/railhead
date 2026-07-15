@@ -1,9 +1,19 @@
 # RAILHEAD
 
+**公開URL: https://akira-kataoka.github.io/railhead/**
+
 B2B Sales Demonstration Platform のプロトタイプ。
 「営業に会う前に、製品を自分で確かめる」ための、製品検索・比較・デモ体験・AI相談を集めたサイトです。
 
 掲載している企業名・製品名・レビュー・数値は**すべて架空のデモデータ**です。
+
+## デプロイ
+
+`main` に push すると GitHub Actions が静的エクスポートして GitHub Pages に配信します
+（`.github/workflows/deploy.yml`）。
+
+Pages はリポジトリ名のサブパス配下で配信されるため、CI では `GITHUB_PAGES=true` を渡して
+`basePath: "/railhead"` を有効にしています。ローカルの `dev` / `build` は素の `/` のままです。
 
 ## 起動
 
