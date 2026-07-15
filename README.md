@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RAILHEAD
 
-## Getting Started
+B2B Sales Demonstration Platform のプロトタイプ。
+「営業に会う前に、製品を自分で確かめる」ための、製品検索・比較・デモ体験・AI相談を集めたサイトです。
 
-First, run the development server:
+掲載している企業名・製品名・レビュー・数値は**すべて架空のデモデータ**です。
+
+## 起動
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm run build    # 44ページを静的生成
+npx eslint src   # lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 実装済みの画面
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+コア導線（検索 → 比較 → デモ → 相談）を優先して実装しています。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 画面 | パス | 状態 |
+| --- | --- | --- |
+| トップ | `/` | 実装済み |
+| 製品一覧（検索・絞り込み） | `/products` | 実装済み |
+| 製品詳細 | `/products/[id]` | 実装済み |
+| 製品比較 | `/compare` | 実装済み |
+| デモセンター | `/demos` | 実装済み |
+| AI相談 | `/ai-consult` | 実装済み（モック） |
+| 業界一覧・業界別 | `/industries`, `/industries/[slug]` | 実装済み |
+| 課題一覧・課題別 | `/challenges`, `/challenges/[slug]` | 実装済み |
+| 導入事例 | `/cases` | 実装済み |
+| コンサルタント | `/consultants` | 一覧のみ（予約は未実装） |
+| パートナー企業 | `/partners` | 一覧のみ（問い合わせは未実装） |
+| ウェビナー・イベント | `/events` | 一覧のみ（申込みは未実装） |
+| コラム・ナレッジ | `/columns` | 一覧のみ（本文は未実装） |
+| マイページ | `/mypage` | スタブ（要ログイン基盤） |
+| 掲載企業管理画面 | `/vendor` | スタブ（要認証・書き込み） |
+| 管理者画面 | `/admin` | スタブ（要認証・書き込み） |
 
-## Learn More
+## 構成
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/          各画面（App Router）
+  components/   UI・クライアント側の状態を持つ部品
+  lib/
+    types.ts    ドメインの型
+    query.ts    製品の絞り込み・並び替え・価格整形
+    ai.ts       AI相談 / AI質問のロジック（本番では LLM に差し替える箇所）
+    data/       モックデータ（製品12・デモ27・事例12・レビュー18 ほか）
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 設計上の判断
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **DB / API なし**：データは `src/lib/data/` の TypeScript オブジェクト。全ページが静的生成されます。
+- **AI はルールベースのモック**：`src/lib/ai.ts` にキーワード一致とスコアリングで実装。回答の骨組み（何を根拠に何を答えるか）を先に固める意図です。API 化するときはこのファイルの
+  `answerProductQuestion` と `recommendProducts` を差し替えれば、UI 側はそのまま使えます。
+- **絞り込み条件は URL に持たせています**：`/products?cat=sfa-crm&ai=1` のようにリロード・共有しても条件が残ります。
+- **比較リストは localStorage**：ログイン基盤がないため。`useSyncExternalStore` で購読しているので別タブとも同期します。上限4件。
+- **フォームはすべてモック**：資料DL・トライアル・問い合わせ・デモ申込みは送信されず、完了画面にその旨を表示します。
 
-## Deploy on Vercel
+## 次にやるとしたら
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. データを DB（または CMS）に移し、`src/lib/data/` を API 取得に置き換える
+2. 認証を入れて、マイページ（お気に入り・履歴）を実装する
+3. `src/lib/ai.ts` を LLM 呼び出しに差し替える
+4. 掲載企業管理画面 / 管理者画面（書き込み系）を実装する
+5. デモの動画プレイヤーと、実機デモの日程調整を実装する
