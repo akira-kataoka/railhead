@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { LeadForm } from "@/components/lead-form";
-import { Badge, Card, EmptyState, ProductLogo } from "@/components/ui";
+import { Badge, Card, EmptyState, ProductLogo, Stat } from "@/components/ui";
 import { demoTypeMeta, demoTypes, demos } from "@/lib/data/demos";
 import { productById } from "@/lib/data/products";
 import { industries } from "@/lib/data/taxonomy";
@@ -71,11 +71,21 @@ export function DemoCenter() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">デモセンター</h1>
-        <p className="mt-1.5 text-sm text-muted">
-          営業に会う前に、製品を自分で確かめる。動画・紙芝居・AIデモは申込み不要でその場から見られます。
+      <div className="mb-7">
+        <p className="mb-1.5 text-[11px] font-black tracking-[0.18em] text-accent uppercase">
+          Demo center
         </p>
+        <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+          触ってから、<span className="grad-text">決める。</span>
+        </h1>
+        <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-muted">
+          動画・紙芝居・AIデモは申込み不要でその場から見られます。実機デモとハンズオンだけ、日程調整が必要です。
+        </p>
+        <dl className="mt-6 flex gap-8 border-t border-border pt-5">
+          <Stat value={`${demos.length}本`} label="デモ" />
+          <Stat value={`${demos.filter((d) => !d.requiresBooking).length}本`} label="申込み不要" />
+          <Stat value={`${demoTypes.length}種類`} label="デモ形式" />
+        </dl>
       </div>
 
       {focusedProduct ? (
@@ -169,24 +179,32 @@ export function DemoCenter() {
             const product = productById(demo.productId);
             if (!product) return null;
             return (
-              <Card key={demo.id} className="flex flex-col overflow-hidden">
+              <Card key={demo.id} className="lift group flex flex-col overflow-hidden">
                 {/* サムネイル代わりの面。実装時は動画のポスター画像に差し替える */}
                 <div
-                  className="relative grid h-32 place-items-center"
-                  style={{ background: `linear-gradient(135deg, ${product.accent}, ${product.accent}80)` }}
+                  className="relative grid h-36 place-items-center overflow-hidden"
+                  style={{ background: `linear-gradient(135deg, ${product.accent}, ${product.accent}70)` }}
                 >
-                  <span className="text-3xl text-white/90" aria-hidden>
-                    {demoTypeMeta[demo.type].icon}
+                  <span className="absolute inset-0 opacity-25 mix-blend-overlay" aria-hidden>
+                    <span className="rails absolute inset-0" />
                   </span>
-                  <span className="absolute right-2 bottom-2 rounded bg-black/50 px-1.5 py-0.5 text-[11px] font-medium text-white tabular-nums">
+                  <span className="grid h-14 w-14 place-items-center rounded-full bg-white/20 text-2xl text-white backdrop-blur transition-transform group-hover:scale-110">
+                    <span aria-hidden>{demoTypeMeta[demo.type].icon}</span>
+                  </span>
+                  <span className="absolute right-2 bottom-2 rounded-md bg-black/55 px-1.5 py-0.5 text-[11px] font-bold text-white tabular-nums">
                     {demo.durationMin}分
                   </span>
+                  {!demo.requiresBooking ? (
+                    <span className="absolute top-2 left-2 rounded-md bg-white/90 px-1.5 py-0.5 text-[10px] font-black text-slate-900">
+                      すぐ視聴
+                    </span>
+                  ) : null}
                 </div>
 
                 <div className="flex flex-1 flex-col p-4">
                   <div className="flex items-center gap-2">
                     <Badge tone="accent">{demo.type}</Badge>
-                    {demo.requiresBooking ? <Badge tone="warn">要申込み</Badge> : <Badge>すぐ視聴</Badge>}
+                    {demo.requiresBooking ? <Badge tone="warn">要申込み</Badge> : null}
                   </div>
 
                   <p className="mt-2.5 font-bold">{demo.title}</p>

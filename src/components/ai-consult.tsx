@@ -12,6 +12,7 @@ import {
   type ConsultInput,
   type Recommendation,
 } from "@/lib/ai";
+import { products } from "@/lib/data/products";
 import { challenges, companySizeLabels, companySizes, industries } from "@/lib/data/taxonomy";
 import { formatPrice } from "@/lib/query";
 import type { CompanySize } from "@/lib/types";
@@ -56,14 +57,18 @@ export function AiConsult() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-6">
-        <Badge tone="accent">✦ AI相談</Badge>
-        <h1 className="mt-2.5 text-2xl font-bold tracking-tight sm:text-3xl">
-          条件を教えてください。最適な製品を提案します
+      <div className="mb-7 text-center">
+        <span className="grad-brand mx-auto grid h-14 w-14 place-items-center rounded-2xl text-2xl text-white shadow-lg">
+          <span aria-hidden>✦</span>
+        </span>
+        <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
+          条件を教えてください。
+          <br />
+          <span className="grad-text">最適な3製品を提案します。</span>
         </h1>
-        <p className="mt-2 text-sm text-muted">
-          業界・規模・課題・予算・時期から、掲載製品の中で条件に合うものを絞り込み、
-          概算費用と導入期間まで含めて提案します。
+        <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted">
+          おすすめの理由だけでなく、確認すべき懸念点・概算費用・導入期間まで併せて出します。
+          入力は30秒、相談は無料です。
         </p>
       </div>
 
@@ -182,9 +187,9 @@ export function AiConsult() {
           type="button"
           onClick={submit}
           disabled={!canSubmit || thinking}
-          className="mt-5 w-full rounded-lg bg-brand px-5 py-3 text-sm font-bold text-brand-fg hover:opacity-90 disabled:opacity-40"
+          className="grad-brand mt-6 w-full rounded-xl px-5 py-4 text-[15px] font-black text-white shadow-md transition-all hover:brightness-110 hover:shadow-lg disabled:pointer-events-none disabled:opacity-40"
         >
-          {thinking ? "提案を作成しています…" : "AIに提案してもらう"}
+          {thinking ? "提案を作成しています…" : "AIに提案してもらう →"}
         </button>
         {!canSubmit ? (
           <p className="mt-2 text-center text-xs text-muted">
@@ -194,10 +199,19 @@ export function AiConsult() {
       </Card>
 
       {thinking ? (
-        <div className="mt-6 space-y-3">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-32 animate-pulse rounded-xl border border-border bg-surface-2" />
-          ))}
+        <div className="mt-8">
+          <p className="mb-3 flex items-center justify-center gap-2 text-sm font-bold text-accent">
+            <span className="relative grid h-2 w-2 place-items-center">
+              <span className="pulse-ring absolute inset-0 rounded-full" />
+              <span className="h-2 w-2 rounded-full bg-accent" />
+            </span>
+            {products.length}製品を条件に照らしています…
+          </p>
+          <div className="space-y-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="shimmer h-36 rounded-2xl border border-border" />
+            ))}
+          </div>
         </div>
       ) : null}
 
@@ -235,9 +249,21 @@ function ConsultResults({ input, results }: { input: ConsultInput; results: Reco
       {/* 提案 */}
       <div className="mt-4 space-y-4">
         {results.map((rec, i) => (
-          <Card key={rec.product.id} className="p-5">
+          <Card
+            key={rec.product.id}
+            className={`lift p-5 ${i === 0 ? "border-accent/40 shadow-pop" : ""}`}
+          >
+            {i === 0 ? (
+              <p className="mb-3 inline-flex items-center gap-1.5 rounded-lg bg-accent px-2.5 py-1 text-[11px] font-black text-white">
+                ★ 条件への合致度がいちばん高い製品
+              </p>
+            ) : null}
             <div className="flex flex-wrap items-start gap-3">
-              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand text-xs font-black text-brand-fg">
+              <span
+                className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-sm font-black ${
+                  i === 0 ? "grad-brand text-white shadow-md" : "bg-surface-2 text-muted"
+                }`}
+              >
                 {i + 1}
               </span>
               <ProductLogo product={rec.product} size={44} />

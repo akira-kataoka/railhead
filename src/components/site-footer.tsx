@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/site-header";
 
 const columns = [
   {
@@ -43,24 +44,18 @@ export function SiteFooter() {
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-2">
-              <span className="grid h-7 w-7 place-items-center rounded bg-brand text-sm font-black text-brand-fg">
-                R
-              </span>
-              <span className="text-[15px] font-black tracking-[0.14em]">RAILHEAD</span>
-            </div>
+            <Logo />
             <p className="mt-3 text-xs leading-relaxed text-muted">
-              営業を介さず、製品を自分で確かめて選ぶための
-              B2B プロダクトプラットフォーム。
+              営業を介さず、製品を自分で確かめて選ぶための B2B プロダクトプラットフォーム。
             </p>
           </div>
           {columns.map((col) => (
             <div key={col.title}>
-              <p className="text-xs font-bold tracking-wide">{col.title}</p>
+              <p className="text-xs font-black tracking-wide">{col.title}</p>
               <ul className="mt-3 space-y-2">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-xs text-muted hover:text-foreground">
+                    <Link href={link.href} className="text-xs text-muted hover:text-accent">
                       {link.label}
                     </Link>
                   </li>

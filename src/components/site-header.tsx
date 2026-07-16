@@ -17,6 +17,17 @@ const nav = [
   { href: "/columns", label: "コラム" },
 ];
 
+export function Logo() {
+  return (
+    <span className="flex shrink-0 items-center gap-2">
+      <span className="grad-brand grid h-7 w-7 place-items-center rounded-lg text-sm font-black text-white shadow-sm">
+        R
+      </span>
+      <span className="text-[15px] font-black tracking-[0.14em]">RAILHEAD</span>
+    </span>
+  );
+}
+
 export function SiteHeader() {
   const pathname = usePathname();
   const { ids } = useCompare();
@@ -25,13 +36,10 @@ export function SiteHeader() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4">
-        <Link href="/" className="flex shrink-0 items-center gap-2" onClick={() => setOpen(false)}>
-          <span className="grid h-7 w-7 place-items-center rounded bg-brand text-sm font-black text-brand-fg">
-            R
-          </span>
-          <span className="text-[15px] font-black tracking-[0.14em]">RAILHEAD</span>
+        <Link href="/" onClick={() => setOpen(false)}>
+          <Logo />
         </Link>
 
         <nav className="ml-2 hidden items-center gap-0.5 xl:flex">
@@ -39,13 +47,16 @@ export function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className={`rounded px-2.5 py-1.5 text-[13px] font-medium transition-colors ${
+              className={`relative rounded-lg px-2.5 py-1.5 text-[13px] font-bold transition-colors ${
                 isActive(item.href)
-                  ? "bg-surface-2 text-foreground"
+                  ? "text-accent"
                   : "text-muted hover:bg-surface-2 hover:text-foreground"
               }`}
             >
               {item.label}
+              {isActive(item.href) ? (
+                <span className="grad-brand absolute inset-x-2.5 -bottom-px h-0.5 rounded-full" />
+              ) : null}
             </Link>
           ))}
         </nav>
@@ -53,31 +64,31 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-2">
           <Link
             href="/compare"
-            className="hidden items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[13px] font-medium hover:bg-surface-2 sm:inline-flex"
+            className="hidden items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-[13px] font-bold transition-colors hover:border-accent hover:text-accent sm:inline-flex"
           >
             比較
             {ids.length > 0 ? (
-              <span className="grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold text-white tabular-nums">
+              <span className="grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-black text-white tabular-nums">
                 {ids.length}
               </span>
             ) : null}
           </Link>
           <Link
             href="/ai-consult"
-            className="rounded-lg bg-brand px-3 py-1.5 text-[13px] font-semibold text-brand-fg hover:opacity-90"
+            className="grad-brand rounded-xl px-3.5 py-1.5 text-[13px] font-black text-white shadow-sm transition-all hover:brightness-110"
           >
-            AIに相談
+            ✦ AIに相談
           </Link>
           <Link
             href="/mypage"
-            className="hidden rounded-lg border border-border px-3 py-1.5 text-[13px] font-medium hover:bg-surface-2 lg:inline-block"
+            className="hidden rounded-xl border border-border px-3 py-1.5 text-[13px] font-bold transition-colors hover:bg-surface-2 lg:inline-block"
           >
             マイページ
           </Link>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="rounded-lg border border-border px-2.5 py-1.5 text-[13px] xl:hidden"
+            className="rounded-xl border border-border px-2.5 py-1.5 text-[13px] xl:hidden"
             aria-expanded={open}
             aria-label="メニューを開く"
           >
@@ -95,8 +106,8 @@ export function SiteHeader() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`rounded px-3 py-2 text-sm font-medium ${
-                    isActive(item.href) ? "bg-surface-2" : "text-muted hover:bg-surface-2"
+                  className={`rounded-lg px-3 py-2 text-sm font-bold ${
+                    isActive(item.href) ? "bg-accent/10 text-accent" : "text-muted hover:bg-surface-2"
                   }`}
                 >
                   {item.label}

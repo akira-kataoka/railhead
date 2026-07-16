@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { CompareToggle } from "@/components/product-card";
 import { LeadForm } from "@/components/lead-form";
 import { ProductAskAi } from "@/components/product-ask-ai";
-import { Badge, Card, ProductLogo, ScoreBar, Stars } from "@/components/ui";
+import { Badge, Card, ProductLogo, ScoreBar, Stars, Stat } from "@/components/ui";
 import { casesByProduct } from "@/lib/data/cases";
 import { demoTypeMeta, demosByProduct } from "@/lib/data/demos";
 import { products, productById } from "@/lib/data/products";
@@ -15,7 +15,7 @@ import {
   companySizeLabels,
   industryBySlug,
 } from "@/lib/data/taxonomy";
-import { emptyFilters, filterProducts, formatPrice } from "@/lib/query";
+import { emptyFilters, filterProducts, formatPrice, formatPriceShort } from "@/lib/query";
 
 export function generateStaticParams() {
   return products.map((p) => ({ id: p.id }));
@@ -62,66 +62,99 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   }));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <nav className="mb-5 flex items-center gap-1.5 text-xs text-muted">
-        <Link href="/" className="hover:text-foreground">
-          TOP
-        </Link>
-        <span>/</span>
-        <Link href="/products" className="hover:text-foreground">
-          製品を探す
-        </Link>
-        <span>/</span>
-        {category ? (
-          <>
-            <Link href={`/products?cat=${category.slug}`} className="hover:text-foreground">
-              {category.name}
+    <>
+      {/* 製品の色を使ったヘッダー。どの製品を見ているかを一目で分からせる */}
+      <div className="relative isolate overflow-hidden border-b border-border">
+        <div
+          className="absolute inset-0 -z-10 opacity-[0.13]"
+          style={{ background: `linear-gradient(120deg, ${product.accent}, transparent 65%)` }}
+          aria-hidden
+        />
+        <div className="rails absolute inset-0 -z-10 opacity-60" aria-hidden />
+
+        <div className="mx-auto max-w-7xl px-4 pt-6 pb-8">
+          <nav className="mb-6 flex items-center gap-1.5 text-xs text-muted">
+            <Link href="/" className="hover:text-accent">
+              TOP
             </Link>
             <span>/</span>
-          </>
-        ) : null}
-        <span className="text-foreground">{product.name}</span>
-      </nav>
-
-      <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
-        <div className="min-w-0">
-          {/* ヘッダー */}
-          <div className="flex flex-wrap items-start gap-4">
-            <ProductLogo product={product} size={60} />
-            <div className="min-w-0 flex-1">
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{product.name}</h1>
-              <p className="mt-1 text-sm text-muted">{product.vendor}</p>
-              <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
-                <Stars rating={product.rating} size="md" />
-                <Link href="#reviews" className="text-xs text-accent hover:underline tabular-nums">
-                  レビュー {product.reviewCount}件
+            <Link href="/products" className="hover:text-accent">
+              製品を探す
+            </Link>
+            <span>/</span>
+            {category ? (
+              <>
+                <Link href={`/products?cat=${category.slug}`} className="hover:text-accent">
+                  {category.name}
                 </Link>
-                <span className="text-xs text-muted tabular-nums">
-                  導入 {product.customerCount.toLocaleString("ja-JP")}社
-                </span>
+                <span>/</span>
+              </>
+            ) : null}
+            <span className="font-bold text-foreground">{product.name}</span>
+          </nav>
+
+          <div className="flex flex-wrap items-start gap-5">
+            <ProductLogo product={product} size={72} />
+            <div className="min-w-0 flex-1">
+              <h1 className="text-3xl font-black tracking-tight sm:text-4xl">{product.name}</h1>
+              <p className="mt-1 text-sm font-medium text-muted">{product.vendor}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {category ? <Badge tone="brand">{category.name}</Badge> : null}
+                <Badge>{product.origin}</Badge>
+                {product.cloud ? <Badge>クラウド</Badge> : null}
+                {product.aiReady ? <Badge tone="accent">AI対応</Badge> : null}
+                {product.freeTrial ? <Badge tone="accent">無料トライアル</Badge> : null}
+                {product.certified ? <Badge tone="warn">認定製品</Badge> : null}
               </div>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-1.5">
-            {category ? <Badge tone="brand">{category.name}</Badge> : null}
-            <Badge>{product.origin}</Badge>
-            {product.cloud ? <Badge>クラウド</Badge> : null}
-            {product.aiReady ? <Badge tone="accent">AI対応</Badge> : null}
-            {product.freeTrial ? <Badge>無料トライアル</Badge> : null}
-            {product.certified ? <Badge tone="warn">認定製品</Badge> : null}
-          </div>
+          <p className="mt-5 max-w-3xl text-lg leading-relaxed font-bold">{product.summary}</p>
 
-          <p className="mt-5 text-[15px] leading-relaxed">{product.summary}</p>
+          <dl className="mt-7 grid max-w-2xl grid-cols-3 gap-6 border-t border-border pt-6">
+            <div>
+              <dt className="sr-only">評価</dt>
+              <dd>
+                <p className="grad-text text-2xl leading-none font-black tabular-nums sm:text-3xl">
+                  {product.rating.toFixed(1)}
+                </p>
+                <div className="mt-1.5">
+                  <Stars rating={product.rating} />
+                </div>
+                <Link href="#reviews" className="text-[11px] text-accent hover:underline tabular-nums">
+                  レビュー {product.reviewCount}件 →
+                </Link>
+              </dd>
+            </div>
+            <Stat
+              value={product.customerCount.toLocaleString("ja-JP")}
+              label="導入企業数"
+              sub={`事例 ${cases.length}件を掲載`}
+            />
+            <Stat
+              value={`${demos.length}本`}
+              label="デモ"
+              sub={
+                demos.filter((d) => !d.requiresBooking).length
+                  ? `${demos.filter((d) => !d.requiresBooking).length}本は申込み不要`
+                  : "いずれも要申込み"
+              }
+            />
+          </dl>
+        </div>
+      </div>
 
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
+          <div className="min-w-0">
           {/* セクション内リンク */}
-          <div className="sticky top-14 z-30 -mx-4 mt-6 border-y border-border bg-background/90 px-4 backdrop-blur">
-            <nav className="flex gap-1 overflow-x-auto py-2">
+          <div className="sticky top-14 z-30 -mx-4 -mt-8 border-b border-border bg-background/90 px-4 backdrop-blur">
+            <nav className="flex gap-1 overflow-x-auto py-2.5">
               {sections.map((s) => (
                 <a
                   key={s.id}
                   href={`#${s.id}`}
-                  className="shrink-0 rounded px-2.5 py-1.5 text-[13px] font-medium text-muted hover:bg-surface-2 hover:text-foreground"
+                  className="shrink-0 rounded-lg px-3 py-1.5 text-[13px] font-bold text-muted transition-colors hover:bg-accent/10 hover:text-accent"
                 >
                   {s.label}
                 </a>
@@ -330,12 +363,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                           </div>
                         ))}
                       </dl>
-                      <p className="mt-4 rounded-lg bg-accent/10 px-3 py-2 text-sm font-bold text-accent">
+                      <p className="mt-4 rounded-xl border border-highlight/25 bg-highlight/8 px-4 py-3 text-base font-black text-highlight">
                         {c.roi}
                       </p>
-                      <blockquote className="mt-3 border-l-2 border-border pl-3 text-xs leading-relaxed text-muted">
+                      <blockquote className="mt-3 border-l-2 border-accent/40 pl-3 text-xs leading-relaxed text-muted">
                         「{c.interview.quote}」
-                        <footer className="mt-1 not-italic">— {c.interview.person}</footer>
+                        <footer className="mt-1 font-bold not-italic">— {c.interview.person}</footer>
                       </blockquote>
                     </Card>
                   );
@@ -448,23 +481,36 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
         {/* サイドの CTA */}
         <aside className="lg:sticky lg:top-20 lg:self-start">
-          <Card className="p-5">
-            <p className="text-xs font-bold tracking-wide text-muted">この製品を試す</p>
-            <p className="mt-2 text-lg font-bold">{formatPrice(product)}</p>
-            <p className="text-xs text-muted">{product.licenseModel}</p>
-
-            <div className="mt-4 space-y-2">
-              {product.freeTrial ? (
-                <LeadForm product={product} intent="trial" />
-              ) : (
-                <LeadForm product={product} intent="demo" />
-              )}
-              <LeadForm product={product} intent="document" variant="secondary" />
-              <LeadForm product={product} intent="contact" variant="secondary" />
-              <div className="pt-1">
-                <CompareToggle product={product} />
-              </div>
+          <Card className="overflow-hidden shadow-pop">
+            <div className="grad-brand px-5 py-4">
+              <p className="text-[11px] font-black tracking-[0.14em] text-white/75">この製品を試す</p>
+              <p className="mt-1.5 text-2xl leading-none font-black text-white">
+                {formatPriceShort(product)}
+              </p>
+              <p className="mt-1 text-[11px] text-white/70">{product.priceUnit}</p>
             </div>
+
+            <div className="p-5">
+              <p className="text-[11px] leading-relaxed text-muted">{product.licenseModel}</p>
+
+              <div className="mt-4 space-y-2">
+                {product.freeTrial ? (
+                  <LeadForm product={product} intent="trial" />
+                ) : (
+                  <LeadForm product={product} intent="demo" />
+                )}
+                <LeadForm product={product} intent="document" variant="secondary" />
+                <LeadForm product={product} intent="contact" variant="secondary" />
+                <div className="pt-1">
+                  <CompareToggle product={product} />
+                </div>
+              </div>
+
+              {product.freeTrial ? (
+                <p className="mt-3 flex items-center gap-1.5 text-[11px] font-bold text-accent">
+                  <span aria-hidden>✓</span> クレジットカード不要で試せます
+                </p>
+              ) : null}
 
             <div className="mt-5 border-t border-border pt-4">
               <p className="text-xs font-bold tracking-wide text-muted">ダウンロードできる資料</p>
@@ -481,14 +527,16 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <div className="mt-5 border-t border-border pt-4">
               <p className="text-xs text-muted">
                 導入の進め方に迷っていますか？
-                <Link href="/consultants" className="ml-1 font-medium text-accent hover:underline">
+                <Link href="/consultants" className="ml-1 font-bold text-accent hover:underline">
                   コンサルタントに相談
                 </Link>
               </p>
             </div>
+            </div>
           </Card>
         </aside>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
